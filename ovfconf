@@ -158,17 +158,17 @@ if [[ $new_hostname == $old_hostname && ("X$new_domain" == "X" || $new_domain ==
   exit 1
 fi
 
-if [[ $new_ip == $old_ip ]]; then
-  log_msg "ERROR: new ip is same as old ($new_ip), exiting"
+if [[ $new_ip == $old_ip && $new_netmask == $old_netmask && $new_gw == $old_gw ]]; then
+  log_msg "ERROR: new ip/netmask, gw is same as old ($new_ip)/($new_netmask), gw: $new_gw exiting"
   exit 1
 fi
 
 log_msg "INFO: platform: $platform, release $release"
 log_msg "INFO: old name: $old_hostname.$old_domain"
-log_msg "INFO: old ip:   $old_ip, gw: $old_gw"
+log_msg "INFO: old ip:   ${old_ip}/${old_netmask}, gw: $old_gw"
 log_msg "INFO: old dns:  $old_dns"
 log_msg "INFO: new name: $new_hostname.$new_domain"
-log_msg "INFO: new ip:   $new_ip, gw: $new_gw"
+log_msg "INFO: new ip:   ${new_ip}/${new_netmask}, gw: $new_gw"
 [[ ! -z $new_dns ]] && log_msg "INFO: new dns:  $new_dns"
 
 ## first, host name and main ip changes
@@ -194,6 +194,9 @@ log_msg "NOTE: chainging main ip to $new_ip"
 log_msg "INFO:  changing $iface_conf config"
 perl -pi -e 's/address (\W?)[0-9.]+/address \1$ENV{new_ip}/' $iface_conf
 
+## change netmask
+log_msg "NOTE: chainging netmask to $new_netmask"
+log_msg "INFO:  changing $iface_conf config"
 perl -pi -e 's/netmask (\W?)[0-9.]+/netmask \1$ENV{new_netmask}/' $iface_conf
 
 ## change gateway: routes and and iface config 
